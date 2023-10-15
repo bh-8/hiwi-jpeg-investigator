@@ -1,0 +1,5 @@
+#!/bin/bash
+DOCKER_BUILDKIT=1 docker build \
+    --tag birnbaum01/hiwi-jpeg-investigator \
+    .
+exit $?
