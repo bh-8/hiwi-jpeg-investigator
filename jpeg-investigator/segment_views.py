@@ -55,7 +55,7 @@ class JpegInvestigationViewer():
             if len(coverage_gaps) > 0:
                 for fr, to in coverage_gaps:
                     if next_position == fr:
-                        tt.add_row(["(!)", "(unidentified data)", fr, to - fr, f"{to - fr} unidentified bytes"])
+                        tt.add_row(["(!) unknown", "(unidentified data)", fr, to - fr, f"{to - fr} unidentified bytes"])
 
         tt.set_deco(texttable.Texttable.HEADER)
         return tt.draw()

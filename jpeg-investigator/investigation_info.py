@@ -89,4 +89,42 @@ class InvestigationInfo():
 
         self.general_investigation_info["coverage"]["percentage"] = (self.general_investigation_info["file_size"] - uncovered_bytes) / self.general_investigation_info["file_size"]
 
+    def filter_segments_view(self, search_segments: str) -> list:
+        coverage_gaps = self.general_investigation_info["coverage"]["gaps"]
 
+        search_segment_list = None
+        if search_segments == "*":
+            search_segment_list = [i["dict_entry"]["abbr"].lower() for i in self.segments]
+            search_segment_list.append("unknown")
+        else:
+            search_segment_list = search_segments.split(",")
+
+        filtered_segments = []
+
+        for search_segment in search_segment_list:
+            segment_counter = 0
+            for segment in self.segments:
+                hex_id = f"{'ff%0.2x' % segment['id']}"
+                abbr_id = segment['dict_entry']['abbr'].lower()
+                pos = segment['position'] + 2
+                length = segment['payload_length']
+
+                if (search_segment in hex_id) or (search_segment in abbr_id):
+                    filtered_segments.append({
+                        "id": f"{abbr_id}-{hex_id}-{segment_counter}",
+                        "fr": pos,
+                        "to": pos + length
+                    })
+                    segment_counter += 1
+
+                if len(coverage_gaps) > 0 and search_segment in "unknown":
+                    next_position = segment["position"] + segment["payload_length"] + 2
+                    for fr, to in coverage_gaps:
+                        if next_position == fr:
+                            filtered_segments.append({
+                                "id": f"unknown-{segment_counter}",
+                                "fr": fr,
+                                "to": to
+                            })
+                            segment_counter += 1
+        return filtered_segments
