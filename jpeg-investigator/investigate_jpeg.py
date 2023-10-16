@@ -4,16 +4,15 @@ import sys
 
 from jpeg_parser.jpeg_parser import JpegParser
 from segment_views import JpegInvestigationViewer
-from segment_coverage import determine_gaps
+import investigation_info
 
-INVESTIGATOR_VERSION = "1.0"
+INVESTIGATOR_VERSION = "2.1"
 
 # JPEG references
 # https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format
 # https://help.accusoft.com/ImageGear/v18.8/Linux/IGDLL-10-05.html
 
 #TODO list:
-# - triggered stego attributes initiate a warning with attrib count
 
 # - thumbnail extraction using exiftool
 #exifexec = [
@@ -59,40 +58,25 @@ if not jpeg_parser.read_jpeg_file(jpeg_file):
     print(f"ERROR: Could not access jpeg data: '{jpeg_file}'!")
     sys.exit(10)
 
+#data handling
+investigation_info = investigation_info.InvestigationInfo()
+investigation_info.set_initial_investigation_info(
+    jpeg_file,
+    len(jpeg_parser.get_jpeg_bytes()),
+    INVESTIGATOR_VERSION
+)
+
 #parse jpeg file
-if not jpeg_parser.parse():
+if not jpeg_parser.parse(investigation_info):
     print(f"ERROR: Mature error due jpeg parsing; make sure the provided data is in jpeg format!")
     sys.exit(11)
 
-#get data
-parsed_data = jpeg_parser.complete_dict()
+investigation_info.determine_coverage()
 
-if not "segments" in parsed_data:
-    print(f"ERROR: Segment list is empty!")
-    sys.exit(12)
-
-#determine coverage
-coverage_gaps = determine_gaps(parsed_data)
-
-#initialize views
-structure_views = JpegInvestigationViewer(jpeg_parser.get_jpeg_bytes(), parsed_data, coverage_gaps)
+#calculations and data acquisition done
+structure_views = JpegInvestigationViewer(jpeg_parser.get_jpeg_bytes(), investigation_info.__dict__)
 
 if True: #report view
-    print(f"[JPEG INVESTIGATOR REPORT START]")
-    print(f"\ngeneral investigation info:")
-    print(f" - investigated file: '{jpeg_file}'")
-    print(f" - file size: {parsed_data['parsing_stats']['data_length']} bytes")
-    print(f" - identified data: {round(structure_views.calculate_coverage_percentage() * 100, 5)}%")
-    print(f" - investigator version: {INVESTIGATOR_VERSION}")
-    print(f"\njpeg segment table:")
-    [print(f" {l}") for l in structure_views.report_segment_table().splitlines()]
-
-    print(f"\nstructure characteristics:")
-    print(structure_views.report_structure_characteristics())
-    print(f"errors/warnings:")
-    print(structure_views.report_critical())
-    print(f"stego attributes:")
-    print(structure_views.report_stego_signatures())
-    print(f"[JPEG INVESTIGATOR REPORT END]")
+    print(structure_views.draw_report())
 
 sys.exit(0)
