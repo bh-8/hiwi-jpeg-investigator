@@ -8,6 +8,7 @@ FROM base AS apt-packages
 
 FROM apt-packages AS pip-requirements
     RUN pip install --upgrade pip
+    RUN pip install texttable
 
 FROM pip-requirements AS setup
     WORKDIR /opt
