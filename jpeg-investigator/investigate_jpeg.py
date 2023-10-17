@@ -19,8 +19,6 @@ INVESTIGATOR_VERSION = "2.4b"
 # ps data id: https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/
 
 #TODO list:
-# return codes unified
-# count unknown segments (if dict is default entry)
 # verify outguess signature correctness
 
 
@@ -52,10 +50,10 @@ has_to_be_silent = args.silent
 
 if (extract_segments is not None and extract_directory is None):
     print(f"ERROR: Parameter '--extract_segments' requires '--extract_directory'!")
-    sys.exit(13)
+    sys.exit(10)
 if (extract_thumbnails and extract_directory is None):
     print(f"ERROR: Parameter '--extract_thumbnails' requires '--extract_directory'!")
-    sys.exit(13)
+    sys.exit(10)
 
 # start investigation phase
 complete_dict = {}
@@ -110,7 +108,7 @@ for _jpeg_file in args.jpeg_file:
         extraction_dir = extract_directory / jpeg_file.stem
         if shutil.which("exiftool") is None:
             print(f"ERROR: Could not find 'exiftool' command. Is it installed and on path?")
-            sys.exit(64)
+            sys.exit(11)
 
         # remove existing thumbnails
         thumbnail_file = extraction_dir / 'thumbnail'
