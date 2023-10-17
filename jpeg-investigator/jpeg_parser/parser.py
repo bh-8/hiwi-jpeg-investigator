@@ -21,6 +21,9 @@ class JpegParser():
         if not jpeg_file.exists():
             return False
         
+        if not jpeg_file.is_file():
+            return False
+
         with open(jpeg_file, "rb") as file_handle:
             return self.set_jpeg_bytes(file_handle.read())
 
