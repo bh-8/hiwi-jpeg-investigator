@@ -36,7 +36,7 @@ class InvestigationInfo():
             "eoi_marker_not_found": None,
             "magic_number_misplaced": None,
             "magic_number_not_found": f"magic number could not be found: not a valid jpeg file",
-            "encoding_not_defined": f"jpeg file does not contain any start of frame segment!",
+            "encoding_not_defined": f"jpeg file does not contain any start of frame segment",
             "multiple_encodings_defined": None,
             "null_segments": None,
             "unknown_segments_found": None,
@@ -96,7 +96,7 @@ class InvestigationInfo():
             unidentified_data.append((compare_position, self.general_investigation_info["file_size"]))
 
         if not len(unidentified_data) == 0:
-            self.set_integrity_error("unidentified_data_found", f"file contains unknown data")
+            self.set_integrity_error("unidentified_data_found", "file contains unknown data")
 
         self.general_investigation_info["coverage"]["unidentified_data"] = unidentified_data
         self.general_investigation_info["coverage"]["unknown_segments"] = unknown_segments

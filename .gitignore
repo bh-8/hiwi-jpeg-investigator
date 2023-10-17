@@ -1,4 +1,6 @@
-/workdir/full_processing
+/workdir/full-processing
+/workdir/segment-classifier
+/workdir/segment-classifier-hashmap
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

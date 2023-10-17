@@ -85,7 +85,7 @@ class JpegInvestigationViewer():
             unidentified_data_bytes += to - fr
         unidentified_percentage = unidentified_data_bytes / self.investigation_info_dict['general_investigation_info']['file_size']
         if unidentified_data_count > 0:
-            sb += f" - encountered {'1 uncovered data segment' if unidentified_data_count == 1 else str(unidentified_data_count) + ' distinct uncovered data segments'} in the file ({unidentified_data_bytes} bytes, {round(unidentified_percentage * 100, 5)}%).\n"
+            sb += f" - encountered {'1 uncovered data segment' if unidentified_data_count == 1 else str(unidentified_data_count) + ' distinct uncovered data segments'} in the file ({unidentified_data_bytes} bytes, {round(unidentified_percentage * 100, 5)}%)\n"
 
         # count unknown segments
         unknown_segment_count = len(self.investigation_info_dict["general_investigation_info"]["coverage"]["unknown_segments"])
@@ -94,7 +94,7 @@ class JpegInvestigationViewer():
             unknown_segment_bytes += to - fr
         unknown_percentage = unknown_segment_bytes / self.investigation_info_dict['general_investigation_info']['file_size']
         if unknown_segment_count > 0:
-            sb += f" - encountered {'1 unknown data segment' if unknown_segment_count == 1 else str(unknown_segment_count) + ' distinct unknown data segments'} in the file ({unknown_segment_bytes} bytes, {round(unknown_percentage * 100, 5)}%).\n"
+            sb += f" - encountered {'1 unknown data segment' if unknown_segment_count == 1 else str(unknown_segment_count) + ' distinct unknown data segments'} in the file ({unknown_segment_bytes} bytes, {round(unknown_percentage * 100, 5)}%)\n"
 
         # count quantization tables
         quantization_tables = self.investigation_info_dict["characteristics"]["quantization_tables"]
