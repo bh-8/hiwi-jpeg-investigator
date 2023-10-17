@@ -1,6 +1,7 @@
 /workdir/full-processing
 /workdir/segment-classifier
 /workdir/segment-classifier-hashmap
+/_classified_flickr
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

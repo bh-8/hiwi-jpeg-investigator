@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#TODO: write in Python...
 if [ "$#" != "1" ]; then
     echo "Syntax: ./classify-segment-contents.sh <segments: csv>"
     echo "  e.g.: ./classify-segment-contents.sh dqt"
@@ -10,6 +10,10 @@ fi
 cd "./workdir"
 files=`ls *.jpg`
 cd "../"
+
+if [ -d "./workdir/segment-classifier" ]; then
+    rm -drf "./workdir/segment-classifier"
+fi
 
 echo "JPEG investigator is running..."
 
@@ -60,11 +64,14 @@ find "./workdir/segment-classifier" -mindepth 1 -maxdepth 1 -type d -print0 |
         if [ ! -d "${checksum_dir}" ]; then
             echo "new class: ${checksum}"
             mkdir $checksum_dir
+
+            cp -r "./workdir/segment-classifier/${identifier}/." "${checksum_dir}"
         fi
 
         checksum_file="${checksum_dir}/${identifier}.jpg"
         echo "classified ${jpg_file} as ${checksum}"
-        cp "${jpg_file}" "${checksum_file}"
+        #mv/cp
+        mv "${jpg_file}" "${checksum_file}"
         echo " --> ${checksum_file}"
     done
 
