@@ -3,7 +3,11 @@ from .segment_types import SEGMENT_TYPES
 class JpegSegment():
     def __init__(self, id: int, position: int) -> None:
         self.id = id
-        self.dict_entry = SEGMENT_TYPES.get(id, None)
+        self.dict_entry = SEGMENT_TYPES.get(id, {
+            "abbr": "unknown",
+            "name": "(unknown segment)",
+            "info": "unknown segment"
+        })
         self.position = position
         self.payload_length = 0
         self.crc32 = None

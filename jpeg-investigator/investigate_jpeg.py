@@ -11,7 +11,7 @@ from jpeg_parser.parser import JpegParser
 from data_handling import InvestigationInfo
 from segment_views import JpegInvestigationViewer
 
-INVESTIGATOR_VERSION = "2.4"
+INVESTIGATOR_VERSION = "2.4b"
 
 # JPEG references
 # https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format
@@ -19,6 +19,8 @@ INVESTIGATOR_VERSION = "2.4"
 # ps data id: https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/
 
 #TODO list:
+# return codes unified
+# count unknown segments (if dict is default entry)
 # verify outguess signature correctness
 
 
@@ -108,7 +110,7 @@ for _jpeg_file in args.jpeg_file:
         extraction_dir = extract_directory / jpeg_file.stem
         if shutil.which("exiftool") is None:
             print(f"ERROR: Could not find 'exiftool' command. Is it installed and on path?")
-            continue
+            sys.exit(64)
 
         # remove existing thumbnails
         thumbnail_file = extraction_dir / 'thumbnail'

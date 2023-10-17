@@ -44,7 +44,7 @@ class JpegInvestigationViewer():
             "segment description"
         ])
 
-        coverage_gaps = self.investigation_info_dict["general_investigation_info"]["coverage"]["gaps"]
+        unidentified_data = self.investigation_info_dict["general_investigation_info"]["coverage"]["unidentified_data"]
         for segment in self.investigation_info_dict["segments"]:
             # add segments
             tt.add_row([
@@ -53,16 +53,16 @@ class JpegInvestigationViewer():
                 segment["position"],
                 segment["payload_length"],
                 hex(0 if segment["crc32"] == None else segment["crc32"]),
-                segment["dict_entry"]["info"]
+                "" if segment["dict_entry"]["info"] is None else segment["dict_entry"]["info"]
             ])
 
             # determine whether unidentified data is following
             next_position = segment["position"] + segment["payload_length"] + 2
-            if len(coverage_gaps) > 0:
-                for fr, to in coverage_gaps:
+            if len(unidentified_data) > 0:
+                for fr, to in unidentified_data:
                     if next_position == fr:
                         segment_data = self.jpeg_bytes[fr:to]
-                        tt.add_row(["(!) unknown", "(unidentified data)", fr, to - fr, hex(binascii.crc32(segment_data)), f"{to - fr} unidentified bytes"])
+                        tt.add_row(["!!!! (unknown)", "(unidentified data)", fr, to - fr, hex(binascii.crc32(segment_data)), "unidentified bytes"])
 
         tt.set_deco(texttable.Texttable.HEADER)
         return tt.draw()
@@ -78,13 +78,23 @@ class JpegInvestigationViewer():
             else:
                 sb += f" - file features more than one encoding!\n"
 
-        # count unidentified segments
-        unidentified_segment_count = len(self.investigation_info_dict["general_investigation_info"]["coverage"]["gaps"])
-        unidentified_bytes_total = 0
-        for fr, to in self.investigation_info_dict["general_investigation_info"]["coverage"]["gaps"]:
-            unidentified_bytes_total += to - fr
-        if unidentified_segment_count > 0:
-            sb += f" - encountered {'1 uncovered data segment' if unidentified_segment_count == 1 else str(unidentified_segment_count) + ' distinct uncovered data segments'} in the file ({unidentified_bytes_total} bytes, {round((1 - self.investigation_info_dict['general_investigation_info']['coverage']['percentage']) * 100, 5)}%).\n"
+        # count unidentified data
+        unidentified_data_count = len(self.investigation_info_dict["general_investigation_info"]["coverage"]["unidentified_data"])
+        unidentified_data_bytes = 0
+        for fr, to in self.investigation_info_dict["general_investigation_info"]["coverage"]["unidentified_data"]:
+            unidentified_data_bytes += to - fr
+        unidentified_percentage = unidentified_data_bytes / self.investigation_info_dict['general_investigation_info']['file_size']
+        if unidentified_data_count > 0:
+            sb += f" - encountered {'1 uncovered data segment' if unidentified_data_count == 1 else str(unidentified_data_count) + ' distinct uncovered data segments'} in the file ({unidentified_data_bytes} bytes, {round(unidentified_percentage * 100, 5)}%).\n"
+
+        # count unknown segments
+        unknown_segment_count = len(self.investigation_info_dict["general_investigation_info"]["coverage"]["unknown_segments"])
+        unknown_segment_bytes = 0
+        for fr, to in self.investigation_info_dict["general_investigation_info"]["coverage"]["unknown_segments"]:
+            unknown_segment_bytes += to - fr
+        unknown_percentage = unknown_segment_bytes / self.investigation_info_dict['general_investigation_info']['file_size']
+        if unknown_segment_count > 0:
+            sb += f" - encountered {'1 unknown data segment' if unknown_segment_count == 1 else str(unknown_segment_count) + ' distinct unknown data segments'} in the file ({unknown_segment_bytes} bytes, {round(unknown_percentage * 100, 5)}%).\n"
 
         # count quantization tables
         quantization_tables = self.investigation_info_dict["characteristics"]["quantization_tables"]

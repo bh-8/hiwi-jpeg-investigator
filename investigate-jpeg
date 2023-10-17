@@ -1,5 +1,6 @@
 #!/bin/bash
 docker run --rm \
+    --user $UID:$GID \
     --hostname="$(hostname)" \
     --volume=$(realpath ./workdir):/home/workdir \
     birnbaum01/hiwi-jpeg-investigator "$@"

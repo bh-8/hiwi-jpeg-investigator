@@ -7,7 +7,8 @@ class InvestigationInfo():
             "investigated_file": None,
             "file_size": None,
             "coverage": {
-                "gaps": None,
+                "unidentified_data": None,
+                "unknown_segments": None,
                 "percentage": None
             },
             "investigator_version": None
@@ -38,6 +39,7 @@ class InvestigationInfo():
             "encoding_not_defined": f"jpeg file does not contain any start of frame segment!",
             "multiple_encodings_defined": None,
             "null_segments": None,
+            "unknown_segments_found": None,
             "stego_attribute_triggered": None
         }
 
@@ -74,38 +76,43 @@ class InvestigationInfo():
 
     def set_stego_attribute(self, stego_tool: str, attribute: str, value: bool) -> None:
         if value:
-            self.integrity_errors["stego_attribute_triggered"] = f"Found potential steganography-related signature(s)!"
+            self.integrity_errors["stego_attribute_triggered"] = f"found potential steganography-related signature(s)"
         self.stego_attributes[stego_tool][attribute] = value
 
     def determine_coverage(self) -> None:
-        uncovered_gaps = []
+        unidentified_data = []
+        unknown_segments = []
 
         compare_position = 0
         for segment in self.segments:
             if segment["position"] != compare_position:
-                uncovered_gaps.append((compare_position, segment["position"]))
-
+                unidentified_data.append((compare_position, segment["position"]))
+            if segment["dict_entry"]["abbr"] == "unknown":
+                unknown_segments.append((segment["position"] + 2, segment["position"] + 2 + segment["payload_length"]))
             compare_position = segment["position"] + segment["payload_length"] + 2
 
         #check if last segment is not eof yet
         if self.general_investigation_info["file_size"] != compare_position:
-            uncovered_gaps.append((compare_position, self.general_investigation_info["file_size"]))
+            unidentified_data.append((compare_position, self.general_investigation_info["file_size"]))
 
-        if not len(uncovered_gaps) == 0:
-            self.set_integrity_error("unidentified_data_found", f"File contains unknown data!")
+        if not len(unidentified_data) == 0:
+            self.set_integrity_error("unidentified_data_found", f"file contains unknown data")
 
-        self.general_investigation_info["coverage"]["gaps"] = uncovered_gaps
+        self.general_investigation_info["coverage"]["unidentified_data"] = unidentified_data
+        self.general_investigation_info["coverage"]["unknown_segments"] = unknown_segments
 
         # sum unidentified bytes
         uncovered_bytes = 0
-        for fr, to in uncovered_gaps:
+        for fr, to in unidentified_data:
+            uncovered_bytes += to - fr
+        for fr, to in unknown_segments:
             uncovered_bytes += to - fr
 
         # set coverage percentage
         self.general_investigation_info["coverage"]["percentage"] = (self.general_investigation_info["file_size"] - uncovered_bytes) / self.general_investigation_info["file_size"]
 
     def filter_segments_view(self, search_segments: str) -> list:
-        coverage_gaps = self.general_investigation_info["coverage"]["gaps"]
+        unidentified_data = self.general_investigation_info["coverage"]["unidentified_data"]
 
         # star operation (all segments)
         search_segment_list = None
@@ -135,9 +142,9 @@ class InvestigationInfo():
                     segment_counter += 1
 
                 # unidentified data
-                if len(coverage_gaps) > 0 and search_segment in "unknown":
+                if len(unidentified_data) > 0 and search_segment in "unknown":
                     next_position = segment["position"] + segment["payload_length"] + 2
-                    for fr, to in coverage_gaps:
+                    for fr, to in unidentified_data:
                         if next_position == fr:
                             filtered_segments.append({
                                 "id": f"unknown-{segment_counter}",
