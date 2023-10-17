@@ -1,6 +1,9 @@
+import binascii
 import pathlib
+
 from .jpeg_structure import JpegStructure, JpegSegment
-from .segment_utils import *
+from .parsing_utility import *
+from .segment_types import SEGMENT_TYPES
 
 class JpegParser():
     def __init__(self) -> None:
@@ -30,17 +33,17 @@ class JpegParser():
         self.jpeg_structure = JpegStructure()
 
         while not parsing_done:
-            #search for next 0xff appearance
+            # search for next 0xff appearance
             ff_position = self.jpeg_bytes.find(b"\xff", parsing_search_offset)
 
-            #in case nothing was found, done
+            # in case nothing was found, done
             if ff_position == -1:
                 parsing_done = True
                 continue
 
             segment_id_position = ff_position + 1
 
-            #check if segment_id_position is in bounds
+            # check if segment_id_position is in bounds
             if segment_id_position >= len(self.jpeg_bytes):
                 parsing_done = True
                 continue
@@ -51,7 +54,7 @@ class JpegParser():
             if segment_id == 0 or segment_id == 255:
                 # \xff\x00 and \xff\xff
                 if len(investigation_info.characteristics["null_segments"]) == 0:
-                    investigation_info.set_integrity_error("null_segments", f"Encountered null segments due to parsing errors!")
+                    investigation_info.set_integrity_error("null_segments", f"encountered null segments due to parsing errors")
                 investigation_info.add_characteristic("null_segments", ff_position)
                 parsing_search_offset = ff_position + 2
                 continue
@@ -62,7 +65,7 @@ class JpegParser():
                 investigation_info.set_integrity_error("magic_number_not_found", None)
 
                 if not ff_position == 0:
-                    investigation_info.set_integrity_error("magic_number_misplaced", f"Magic Number could not be verified: Found on pos {ff_position}, but expected at 0!")
+                    investigation_info.set_integrity_error("magic_number_misplaced", f"magic number could not be verified: found on pos {ff_position}, but expected at 0!")
 
                 parsing_search_offset = ff_position + 2
                 continue
@@ -80,14 +83,19 @@ class JpegParser():
             if segment_id == 196:
                 # \xff\xc4 - Huffman Table
                 investigation_info.add_characteristic("huffman_tables", ff_position)
-            if segment_id == 218:
+            elif (segment_id >= 192 and segment_id <= 195) or (segment_id >= 197 and segment_id <= 199) or (segment_id >= 201 and segment_id <= 203) or (segment_id >= 205 and segment_id <= 207):
+                # \xff\xc0-f - Encoding
+                investigation_info.set_integrity_error("encoding_not_defined", None)
+                investigation_info.add_characteristic("encodings", SEGMENT_TYPES.get(segment_id, None)["info"])
+            elif segment_id == 218:
                 # \xff\xda - Start of Scan
                 default_length_info = False
 
                 eoi_position = self.jpeg_bytes.find(b"\xff\xd9", ff_position + 2)
+                # jsteg signature
                 if eoi_position == -1:
                     investigation_info.set_stego_attribute("jsteg", "eoi_marker_not_found", True)
-                    investigation_info.set_integrity_error("eoi_marker_not_found", f"Could not find EOI segment after SOS marker!")
+                    investigation_info.set_integrity_error("eoi_marker_not_found", f"could not find end of image segment after start of scan marker!")
                     
                     new_segment.set_payload_length(len(self.jpeg_bytes) - payload_position)
                 else:
@@ -99,17 +107,18 @@ class JpegParser():
                 payload_length = new_segment.get_payload_length()
                 payload_data = extract_payload_data(self.jpeg_bytes, ff_position, payload_length)
 
-                #f5 signature
+                # f5 signature
                 if ff_position == 20 and payload_length == 132:
                     if payload_data[82:132] == b"(" * 50:
                         investigation_info.set_stego_attribute("f5", "suspicious_quantization_table", True)
 
-                #outguess signature
+                # outguess signature
                 if ff_position == 89 and payload_length == 67:
                     if payload_data[17:67] == b"2" * 50:
                         investigation_info.set_stego_attribute("outguess", "suspicious_quantization_table", True)
             elif segment_id == 224:
                 # \xff\xe0 - JFIF-Tag
+                # jsteg signature
                 investigation_info.set_stego_attribute("jsteg", "jfif_marker_not_found", False)
             elif segment_id == 225:
                 # \xff\xe1 - Application 1
@@ -137,9 +146,11 @@ class JpegParser():
                     ps_signature_position = payload_position + 16
                     ps_signature = self.jpeg_bytes[ps_signature_position:ps_signature_position + 4].decode(errors = "ignore")
 
+            segment_payload = extract_payload_data(self.jpeg_bytes, ff_position, new_segment.get_payload_length())
             new_segment.set_segment_data(
                 extract_segment_header(self.jpeg_bytes, ff_position, default_length_info),
-                extract_payload_data(self.jpeg_bytes, ff_position, new_segment.get_payload_length())
+                segment_payload,
+                binascii.crc32(segment_payload)
             )
 
             self.jpeg_structure.add_segment(new_segment)

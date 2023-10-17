@@ -2,42 +2,42 @@ SEGMENT_TYPES = {
     192: { #FF C0
         "abbr": "SOF0",
         "name": "Start Of Frame",
-        "info": "Baseline DCT"
+        "info": "baseline dct"
     },
     193: { #FF C1
         "abbr": "SOF1",
         "name": "Start Of Frame",
-        "info": "Extended sequential DCT"
+        "info": "extended sequential dct"
     },
     194: { #FF C2
         "abbr": "SOF2",
         "name": "Start Of Frame",
-        "info": "Progressive DCT"
+        "info": "progressive dct"
     },
     195: { #FF C3
         "abbr": "SOF3",
         "name": "Start Of Frame",
-        "info": "Lossless (sequential)"
+        "info": "lossless (sequential)"
     },
     196: { #FF C4
         "abbr": "DHT",
         "name": "Define Huffman Table",
-        "info": "Huffman Table Definition"
+        "info": "huffman table definition"
     },
     197: { #FF C5
         "abbr": "SOF5",
         "name": "Start Of Frame",
-        "info": "Differential sequential DCT"
+        "info": "differential sequential dct"
     },
     198: { #FF C6
         "abbr": "SOF6",
         "name": "Start Of Frame",
-        "info": "Differential progressive DCT"
+        "info": "differential progressive dct"
     },
     199: { #FF C7
         "abbr": "SOF7",
         "name": "Start Of Frame",
-        "info": "Differential lossless (sequential)"
+        "info": "differential lossless (sequential)"
     },
     200: { #FF C8
         "abbr": "JPG",
@@ -47,37 +47,37 @@ SEGMENT_TYPES = {
     201: { #FF C9
         "abbr": "SOF9",
         "name": "Start Of Frame",
-        "info": "Extended sequential DCT, arithmetic coding"
+        "info": "extended sequential dct, arithmetic coding"
     },
     202: { #FF CA
         "abbr": "SOF10",
         "name": "Start Of Frame",
-        "info": "Progressive DCT, arithmetic coding"
+        "info": "progressive dct, arithmetic coding"
     },
     203: { #FF CB
         "abbr": "SOF11",
         "name": "Start Of Frame",
-        "info": "Lossless (sequential), arithmetic coding"
+        "info": "lossless (sequential), arithmetic coding"
     },
     204: { #FF CC
         "abbr": "DAC",
         "name": "Define Arithmetic Coding",
-        "info": "Arithmetic coding definition"
+        "info": "arithmetic coding definition"
     },
     205: { #FF CD
         "abbr": "SOF13",
         "name": "Start Of Frame",
-        "info": "Differential sequential DCT"
+        "info": "differential sequential dct"
     },
     206: { #FF CE
         "abbr": "SOF14",
         "name": "Start Of Frame",
-        "info": "Differential progressive DCT"
+        "info": "differential progressive dct"
     },
     207: { #FF CF
         "abbr": "SOF15",
         "name": "Start Of Frame",
-        "info": "Differential lossless (sequential)"
+        "info": "differential lossless (sequential)"
     },
     208: { #FF D0
         "abbr": "RST0",
@@ -122,22 +122,22 @@ SEGMENT_TYPES = {
     216: { #FF D8
         "abbr": "SOI",
         "name": "Start Of Image",
-        "info": "Magic Number"
+        "info": "magic number"
     },
     217: { #FF D9
         "abbr": "EOI",
-        "name": "End of Image",
-        "info": "End of JPEG image data"
+        "name": "End Of Image",
+        "info": "end of jpeg image data"
     },
     218: { #FF DA
         "abbr": "SOS",
         "name": "Start Of Scan",
-        "info": "Image data segment"
+        "info": "image data segment"
     },
     219: { #FF DB
         "abbr": "DQT",
         "name": "Define Quantization Tables",
-        "info": "Quantization table definitions"
+        "info": "quantization table definition"
     },
     220: { #FF DC
         "abbr": "DNL",
@@ -162,22 +162,22 @@ SEGMENT_TYPES = {
     224: { #FF E0
         "abbr": "APP0",
         "name": "Application Segment 0",
-        "info": "JFIF-Tag"
+        "info": "jfif tag"
     },
     225: { #FF E1
         "abbr": "APP1",
         "name": "Application Segment 1",
-        "info": "Commonly used for exif-data, thumbnails or Adobe XMP profiles"
+        "info": "commonly used for exif-data, thumbnails or adobe xmp profiles"
     },
     226: { #FF E2
         "abbr": "APP2",
         "name": "Application Segment 2",
-        "info": "Commonly used for ICC color profiles"
+        "info": "commonly used for icc color profiles"
     },
     227: { #FF E3
         "abbr": "APP3",
         "name": "Application Segment 3",
-        "info": "Commonly used as JPS-tag for stereoscopic JPEG images"
+        "info": "commonly used as jps-tag for stereoscopic jpeg images"
     },
     228: { #FF E4
         "abbr": "APP4",
@@ -192,7 +192,7 @@ SEGMENT_TYPES = {
     230: { #FF E6
         "abbr": "APP6",
         "name": "Application Segment 6",
-        "info": "Commonly used for NITF lossles profiles"
+        "info": "commonly used for nitf lossles profiles"
     },
     231: { #FF E7
         "abbr": "APP7",
@@ -212,27 +212,27 @@ SEGMENT_TYPES = {
     234: { #FF EA
         "abbr": "APP10",
         "name": "Application Segment 10",
-        "info": "Commonly used to store ActiveObject"
+        "info": "commonly used to store activeobjects"
     },
     235: { #FF EB
         "abbr": "APP11",
         "name": "Application Segment 11",
-        "info": "Commonly used to store HELIOS JPEG resources (OPI Postscript)"
+        "info": "commonly used to store helios jpeg resources (opi postscript)"
     },
     236: { #FF EC
         "abbr": "APP12",
         "name": "Application Segment 12",
-        "info": "Commonly used by Photoshop to store Ducky tags or picture info"
+        "info": "commonly used by photoshop to store ducky tags or picture info"
     },
     237: { #FF ED
         "abbr": "APP13",
         "name": "Application Segment 13",
-        "info": "Commonly used by Photoshop to store IRB, 8BIM or IPTC data"
+        "info": "commonly used by photoshop to store irb, 8bim or iptc data"
     },
     238: { #FF EE
         "abbr": "APP14",
         "name": "Application Segment 14",
-        "info": "Commonly used for copyright information"
+        "info": "commonly used for copyright information"
     },
     239: { #FF EF
         "abbr": "APP15",

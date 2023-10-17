@@ -1,7 +1,8 @@
-from pathlib import Path
+import pathlib
 
 class InvestigationInfo():
     def __init__(self) -> None:
+        # general info
         self.general_investigation_info = {
             "investigated_file": None,
             "file_size": None,
@@ -11,8 +12,14 @@ class InvestigationInfo():
             },
             "investigator_version": None
         }
+
+        # segment list
         self.segments = None
+
+        # characteristics
         self.characteristics = {
+            "encodings": [],
+
             "quantization_tables": [],
             "huffman_tables": [],
             "icc_profiles": [],
@@ -22,13 +29,19 @@ class InvestigationInfo():
 
             "null_segments": []
         }
+
+        # errors
         self.integrity_errors = {
             "eoi_marker_not_found": None,
             "magic_number_misplaced": None,
-            "magic_number_not_found": f"Magic Number could not be found: Not a valid JPEG file!",
+            "magic_number_not_found": f"magic number could not be found: not a valid jpeg file",
+            "encoding_not_defined": f"jpeg file does not contain any start of frame segment!",
+            "multiple_encodings_defined": None,
             "null_segments": None,
             "stego_attribute_triggered": None
         }
+
+        # attributes
         self.stego_attributes = {
             "f5": {
                 "suspicious_quantization_table": False
@@ -42,7 +55,7 @@ class InvestigationInfo():
             }
         }
 
-    def set_initial_investigation_info(self, investigated_file: Path, file_size: int, investigator_version: str) -> None:
+    def set_initial_investigation_info(self, investigated_file: pathlib.Path, file_size: int, investigator_version: str) -> None:
         self.general_investigation_info["investigated_file"] = str(investigated_file)
         self.general_investigation_info["file_size"] = file_size
         self.general_investigation_info["investigator_version"] = investigator_version
@@ -53,8 +66,8 @@ class InvestigationInfo():
     def set_segment_info(self, segments: dict) -> None:
         self.segments = segments
 
-    def add_characteristic(self, characteristic: str, ff_position: int) -> None:
-        self.characteristics[characteristic].append(ff_position)
+    def add_characteristic(self, characteristic: str, value) -> None:
+        self.characteristics[characteristic].append(value)
 
     def set_integrity_error(self, error: str, value: str):
         self.integrity_errors[error] = value
@@ -83,15 +96,18 @@ class InvestigationInfo():
 
         self.general_investigation_info["coverage"]["gaps"] = uncovered_gaps
 
+        # sum unidentified bytes
         uncovered_bytes = 0
         for fr, to in uncovered_gaps:
             uncovered_bytes += to - fr
 
+        # set coverage percentage
         self.general_investigation_info["coverage"]["percentage"] = (self.general_investigation_info["file_size"] - uncovered_bytes) / self.general_investigation_info["file_size"]
 
     def filter_segments_view(self, search_segments: str) -> list:
         coverage_gaps = self.general_investigation_info["coverage"]["gaps"]
 
+        # star operation (all segments)
         search_segment_list = None
         if search_segments == "*":
             search_segment_list = [i["dict_entry"]["abbr"].lower() for i in self.segments]
@@ -99,8 +115,8 @@ class InvestigationInfo():
         else:
             search_segment_list = search_segments.split(",")
 
+        # collect filtered segments
         filtered_segments = []
-
         for search_segment in search_segment_list:
             segment_counter = 0
             for segment in self.segments:
@@ -109,6 +125,7 @@ class InvestigationInfo():
                 pos = segment['position'] + 2
                 length = segment['payload_length']
 
+                # check default segments
                 if (search_segment in hex_id) or (search_segment in abbr_id):
                     filtered_segments.append({
                         "id": f"{abbr_id}-{hex_id}-{segment_counter}",
@@ -117,6 +134,7 @@ class InvestigationInfo():
                     })
                     segment_counter += 1
 
+                # unidentified data
                 if len(coverage_gaps) > 0 and search_segment in "unknown":
                     next_position = segment["position"] + segment["payload_length"] + 2
                     for fr, to in coverage_gaps:

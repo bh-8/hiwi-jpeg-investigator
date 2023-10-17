@@ -1,4 +1,3 @@
-import json
 from .segment_types import SEGMENT_TYPES
 
 class JpegSegment():
@@ -7,6 +6,8 @@ class JpegSegment():
         self.dict_entry = SEGMENT_TYPES.get(id, None)
         self.position = position
         self.payload_length = 0
+        self.crc32 = None
+
         self.header = None
         self.payload = None
 
@@ -16,9 +17,10 @@ class JpegSegment():
     def get_payload_length(self) -> int:
         return self.payload_length
 
-    def set_segment_data(self, header: bytes, payload: bytes) -> None:
+    def set_segment_data(self, header: bytes, payload: bytes, crc32: int) -> None:
         self.header = str(header)
         self.payload = str(payload)
+        self.crc32 = crc32
 
 class JpegStructure():
     def __init__(self) -> None:

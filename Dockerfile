@@ -4,6 +4,7 @@ FROM base AS apt-packages
     RUN apt-get update
     RUN apt-get install python3.10 -y
     RUN apt-get install python3-pip -y
+    RUN apt-get install exiftool -y
     RUN rm -rf /var/lib/apt/lists/*
 
 FROM apt-packages AS pip-requirements
