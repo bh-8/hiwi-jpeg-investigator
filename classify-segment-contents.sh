@@ -71,7 +71,7 @@ find "./workdir/segment-classifier" -mindepth 1 -maxdepth 1 -type d -print0 |
         checksum_file="${checksum_dir}/${identifier}.jpg"
         echo "classified ${jpg_file} as ${checksum}"
         #mv/cp
-        mv "${jpg_file}" "${checksum_file}"
+        cp "${jpg_file}" "${checksum_file}"
         echo " --> ${checksum_file}"
     done
 
