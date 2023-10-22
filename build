@@ -1,4 +1,9 @@
 #!/bin/bash
+
+EXEC_MAIN="investigate-jpeg"
+EXEC_ALL="investigate-all"
+EXEC_CLASSIFY="classify-all"
+
 echo "[JPEG INVESTIGATOR BUILD] building docker image..."
 DOCKER_BUILDKIT=1 docker build --tag birnbaum01/hiwi-jpeg-investigator .
 err_lvl=$?
@@ -9,51 +14,59 @@ if [ "$err_lvl" != "0" ]; then
 fi
 
 echo "[JPEG INVESTIGATOR BUILD] creating docker executables..."
-cp "./scripts/investigate-jpeg" "./investigate-jpeg" && chmod +x "./investigate-jpeg"
-cp "./scripts/investigate-all" "./investigate-all" && chmod +x "./investigate-all"
-cp "./scripts/classify-all" "./classify-all" && chmod +x "./classify-all"
+cp --force --recursive ./scripts/. .
+chmod +x ./$EXEC_MAIN ./$EXEC_ALL ./$EXEC_CLASSIFY
 
 echo "[JPEG INVESTIGATOR BUILD] creating native tarball..."
-EXPORT_TAR="jpeg-investigator-release.tar.gz"
-EXPORT_DIR="jpeg-investigator-release"
-EXPORT_APT_DEPS="$EXPORT_DIR/apt-dependencies.txt"
-EXPORT_PIP_DEPS="$EXPORT_DIR/pip-requirements.txt"
-EXECUTABLE="$EXPORT_DIR/investigate-jpeg"
+NATIVE_TARBALL="jpeg-investigator-release.tar.gz"
+NATIVE_EXPORT="jpeg-investigator-release"
+NATIVE_DEPS_TXT="apt-dependencies.txt"
+NATIVE_REQS_TXT="pip-requirements.txt"
 
-if [ -d "$EXPORT_DIR" ]; then
-    rm -drf "$EXPORT_DIR"
+EXPORT_APT_DEPS="$NATIVE_EXPORT/$NATIVE_DEPS_TXT"
+EXPORT_PIP_DEPS="$NATIVE_EXPORT/$NATIVE_REQS_TXT"
+NATIVE_INSTALL="$NATIVE_EXPORT/install"
+NATIVE_EXEC="$NATIVE_EXPORT/scripts/$EXEC_MAIN"
+
+if [ -d "$NATIVE_EXPORT" ]; then
+    rm -drf "$NATIVE_EXPORT"
 fi
-if [ -f "$EXPORT_TAR" ]; then
-    rm -f "$EXPORT_TAR"
+if [ -f "$NATIVE_TARBALL" ]; then
+    rm -f "$NATIVE_TARBALL"
 fi
 
 #copy tool and requirements
-cp -R "./jpeg-investigator" "$EXPORT_DIR"
+cp -R "./jpeg-investigator" "$NATIVE_EXPORT"
+cp -R "./scripts" "$NATIVE_EXPORT/scripts"
+
 echo "python3.10" >> "$EXPORT_APT_DEPS"
 echo "python3-pip" >> "$EXPORT_APT_DEPS"
 echo "exiftool" >> "$EXPORT_APT_DEPS"
 echo "texttable" >> "$EXPORT_PIP_DEPS"
 
 #create example usage structure
-mkdir "$EXPORT_DIR/workdir"
-find workdir -mindepth 1 -maxdepth 1 -type f -exec cp "{}" "$EXPORT_DIR/{}" \;
+mkdir "$NATIVE_EXPORT/workdir"
+find workdir -mindepth 1 -maxdepth 1 -type f -exec cp "{}" "$NATIVE_EXPORT/{}" \;
 
 #exchange main executable to native version
-rm -f "$EXPORT_DIR/entrypoint.sh"
-echo "#!/bin/bash" > "$EXECUTABLE"
-echo "python3 -u ./jpeg_investigator.py \"\$@\"" >> "$EXECUTABLE"
-echo "exit \$?" >> "$EXECUTABLE"
-chmod +x "$EXECUTABLE"
+rm -f "$NATIVE_EXPORT/entrypoint.sh"
+echo "#!/bin/bash" > "$NATIVE_EXEC"
+echo "python3 -u ./jpeg_investigator.py \"\$@\"" >> "$NATIVE_EXEC"
+echo "exit \$?" >> "$NATIVE_EXEC"
 
-cp "./scripts/investigate-all" "$EXPORT_DIR/investigate-all" && chmod +x "$EXPORT_DIR/investigate-all"
-cp "./scripts/classify-all" "$EXPORT_DIR/classify-all" && chmod +x "$EXPORT_DIR/classify-all"
+echo "#!/bin/bash" > "$NATIVE_INSTALL"
+echo "sudo apt-get update && xargs sudo apt-get -y install < ./$NATIVE_DEPS_TXT" >> "$NATIVE_INSTALL"
+echo "pip3 install --upgrade -r ./$NATIVE_REQS_TXT" >> "$NATIVE_INSTALL"
+echo "cp --force --recursive ./scripts/. ." >> "$NATIVE_INSTALL"
+echo "chmod +x ./$EXEC_MAIN ./$EXEC_ALL ./$EXEC_CLASSIFY" >> "$NATIVE_INSTALL"
+echo "./$EXEC_MAIN --help" >> "$NATIVE_INSTALL"
+echo "exit 0" >> "$NATIVE_INSTALL"
+chmod +x "$NATIVE_INSTALL"
 
-#tar -cvzf "$EXPORT_TAR" "$EXPORT_DIR"
-#rm -drf "$EXPORT_DIR"
+tar -cvzf "$NATIVE_TARBALL" "$NATIVE_EXPORT"
+rm -drf "$NATIVE_EXPORT"
 
-#TODO: write run scripts after successful build
-#   investigate-jpeg, investigate-all, classify-all; last both copied to release!
-#TODO: update readme and include with release!
+#TODO: readme and include with release!
 
 echo "Done!"
 exit 0
