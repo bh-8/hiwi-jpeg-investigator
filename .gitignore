@@ -1,6 +1,7 @@
 /investigate-jpeg
 /investigate-all
 /classify-all
+/jpeg-investigator-release.tar.gz
 
 /workdir/*
 !/workdir/*.jpg

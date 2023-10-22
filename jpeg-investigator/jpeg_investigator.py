@@ -11,7 +11,7 @@ from jpeg_parser.parser import JpegParser
 from data_handling import InvestigationInfo
 from report import JpegInvestigationViewer
 
-INVESTIGATOR_VERSION = "2.5"
+INVESTIGATOR_VERSION = "2.5b"
 
 # JPEG references
 # https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format

@@ -8,6 +8,8 @@ JPEG structure analysis tool featuring file integrity checks, segment extraction
 - execute `./investigate-jpeg --help` to double-check if installation was successful
 ### dockerized approach (no native installation)
 - requires [docker engine](https://docs.docker.com/engine/install/ubuntu/)
+- clone repository using `git clone https://github.com/birnbaum01/hiwi-jpeg-investigator.git`
+- open terminal in `hiwi-jpeg-investigator/`
 - initiate build process using `./build`
 - execute `./investigate-jpeg --help` to double-check if installation was successful
 ## usage
