@@ -36,8 +36,10 @@ if [ -f "$NATIVE_TARBALL" ]; then
 fi
 
 #copy tool and requirements
+cp README.md jpeg-investigator-release/README.md
 cp -R "./jpeg-investigator" "$NATIVE_EXPORT"
 cp -R "./scripts" "$NATIVE_EXPORT/scripts"
+cp "./README.md" "$NATIVE_EXPORT/README.md"
 
 echo "python3.10" >> "$EXPORT_APT_DEPS"
 echo "python3-pip" >> "$EXPORT_APT_DEPS"
@@ -64,8 +66,6 @@ chmod +x "$NATIVE_INSTALL"
 
 tar -cvzf "$NATIVE_TARBALL" "$NATIVE_EXPORT"
 rm -drf "$NATIVE_EXPORT"
-
-#TODO: readme and include with release!
 
 echo "Done!"
 exit 0

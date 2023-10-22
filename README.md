@@ -2,7 +2,7 @@
 JPEG structure analysis tool featuring file integrity checks, segment extraction and stego detection.
 ## setup
 ### native installation from tarball
-- extract `jpeg-investigator-release.tar.gz` to any location
+- extract `jpeg-investigator-release.tar.gz` to any location using `tar -xzf jpeg-investigator-release.tar.gz`
 - open terminal in `jpeg-investigator-release/`
 - run `./install` to install required dependencies natively
 - execute `./investigate-jpeg --help` to double-check if installation was successful
