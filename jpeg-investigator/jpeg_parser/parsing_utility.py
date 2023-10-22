@@ -3,17 +3,20 @@ XMPPROFILE_SIGNATURE = b"XMP\x00://ns.adobe.com/xap/1.0/\x00"
 ICCPROFILE_SIGNATURE = b"ICC_PROFILE\x00"
 PHOTOSHOP_SIGNATURE = b"Photoshop 3.0\x00"
 
+def check_signature(signature: str):
+    return lambda b, p : b[p + 2:p + 2 + len(signature)] == signature
+
 def check_exif_signature(jpeg_bytes: bytes, payload_position: int) -> bool:
-    return jpeg_bytes[payload_position + 2:payload_position + 2 + len(EXIF_SIGNATURE)] == EXIF_SIGNATURE
+    return check_signature(EXIF_SIGNATURE)(jpeg_bytes, payload_position)
 
 def check_xmp_profile_signature(jpeg_bytes: bytes, payload_position: int) -> bool:
-    return jpeg_bytes[payload_position + 2:payload_position + 2 + len(XMPPROFILE_SIGNATURE)] == XMPPROFILE_SIGNATURE
+    return check_signature(XMPPROFILE_SIGNATURE)(jpeg_bytes, payload_position)
 
 def check_icc_profile_signature(jpeg_bytes: bytes, payload_position: int) -> bool:
-    return jpeg_bytes[payload_position + 2:payload_position + 2 + len(ICCPROFILE_SIGNATURE)] == ICCPROFILE_SIGNATURE
+    return check_signature(ICCPROFILE_SIGNATURE)(jpeg_bytes, payload_position)
 
 def check_photoshop_signature(jpeg_bytes: bytes, payload_position: int) -> bool:
-    return jpeg_bytes[payload_position + 2:payload_position + 2 + len(PHOTOSHOP_SIGNATURE)] == PHOTOSHOP_SIGNATURE
+    return check_signature(PHOTOSHOP_SIGNATURE)(jpeg_bytes, payload_position)
 
 def calculate_default_payload_length(jpeg_bytes: bytes, payload_position: int) -> int:
     if not payload_position + 1 < len(jpeg_bytes):

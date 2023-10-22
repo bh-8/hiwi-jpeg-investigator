@@ -1,37 +1,32 @@
 #!/bin/bash
-#TODO: write in Python...
 if [ "$#" != "1" ]; then
-    echo "Syntax: ./classify-segment-contents.sh <segments: csv>"
-    echo "  e.g.: ./classify-segment-contents.sh dqt"
-    echo "        ./classify-segment-contents.sh dqt,sof"
+    echo "Syntax: ./classify-all <segments: csv>"
+    echo "  e.g.  ./classify-all dqt"
+    echo "        ./classify-all dqt,sof"
     exit 1
 fi
+if [ ! -d "./workdir" ]; then
+    echo "ERROR: Could not find directory '$(realpath ./workdir)'!"
+    exit 20
+fi
 
-cd "./workdir"
-files=`ls *.jpg`
-cd "../"
-
+echo "Investigating JPEG files..."
+jpg_files=`ls ./workdir/*.jpg`
 if [ -d "./workdir/segment-classifier" ]; then
     rm -drf "./workdir/segment-classifier"
 fi
-
-echo "JPEG investigator is running..."
-
-./investigate-jpeg -ed segment-classifier -es "$1" -f -s $files
+./investigate-jpeg --extract_directory "./workdir/segment-classifier" --extract_segments "$1" --force --silent $jpg_files
 err_lvl=$?
-
 if [ "$err_lvl" != "0" ]; then
     echo "ERROR: JPEG investigator exited with a non-zero error-code!"
     exit $err_lvl
 fi
-
 if [ ! -d "./workdir/segment-classifier" ]; then
     echo "ERROR: No data source available!"
-    exit 20
+    exit 21
 fi
 
 echo "Running classification..."
-
 out_dir="./workdir/segment-classifier-hashmap"
 if [ -d "${out_dir}" ]; then
     rm -drf $out_dir
@@ -46,7 +41,7 @@ find "./workdir/segment-classifier" -mindepth 1 -maxdepth 1 -type d -print0 |
         jpg_file="./workdir/${identifier}.jpg"
         if [ ! -f "${jpg_file}" ]; then
             echo "ERROR: Could not find '${jpg_file}'!"
-            exit 21
+            exit 22
         fi
 
         # read extracted segments
@@ -62,19 +57,13 @@ find "./workdir/segment-classifier" -mindepth 1 -maxdepth 1 -type d -print0 |
         # copy
         checksum_dir="${out_dir}/${checksum}"
         if [ ! -d "${checksum_dir}" ]; then
-            echo "new class: ${checksum}"
+            echo "  New class: ${checksum}"
             mkdir $checksum_dir
-
             cp -r "./workdir/segment-classifier/${identifier}/." "${checksum_dir}"
         fi
-
         checksum_file="${checksum_dir}/${identifier}.jpg"
-        echo "classified ${jpg_file} as ${checksum}"
-        #mv/cp
+        echo "  Classified ${jpg_file} as ${checksum}"
         cp "${jpg_file}" "${checksum_file}"
-        echo " --> ${checksum_file}"
     done
-
 echo "Done!"
-
 exit 0

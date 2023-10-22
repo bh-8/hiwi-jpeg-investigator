@@ -77,6 +77,9 @@ class JpegParser():
                 self.jpeg_structure.add_segment(new_segment)
                 
                 parsing_search_offset = ff_position + 2
+
+                #abort parsing after EOI
+                parsing_done = True
                 continue
 
             payload_position = ff_position + 2

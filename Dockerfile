@@ -17,7 +17,7 @@ FROM pip-requirements AS setup
     RUN chmod +x ./jpeg-investigator/entrypoint.sh
 
     RUN mkdir /home/workdir
-    WORKDIR /home/workdir
+    WORKDIR /home
 
 FROM setup AS finish
     ENTRYPOINT [ "/opt/jpeg-investigator/entrypoint.sh" ]

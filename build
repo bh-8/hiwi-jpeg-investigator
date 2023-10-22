@@ -1,5 +1,59 @@
 #!/bin/bash
-DOCKER_BUILDKIT=1 docker build \
-    --tag birnbaum01/hiwi-jpeg-investigator \
-    .
-exit $?
+echo "[JPEG INVESTIGATOR BUILD] building docker image..."
+DOCKER_BUILDKIT=1 docker build --tag birnbaum01/hiwi-jpeg-investigator .
+err_lvl=$?
+
+if [ "$err_lvl" != "0" ]; then
+    echo "Failed to build docker image!"
+    exit $err_lvl
+fi
+
+echo "[JPEG INVESTIGATOR BUILD] creating docker executables..."
+cp "./scripts/investigate-jpeg" "./investigate-jpeg" && chmod +x "./investigate-jpeg"
+cp "./scripts/investigate-all" "./investigate-all" && chmod +x "./investigate-all"
+cp "./scripts/classify-all" "./classify-all" && chmod +x "./classify-all"
+
+echo "[JPEG INVESTIGATOR BUILD] creating native tarball..."
+EXPORT_TAR="jpeg-investigator-release.tar.gz"
+EXPORT_DIR="jpeg-investigator-release"
+EXPORT_APT_DEPS="$EXPORT_DIR/apt-dependencies.txt"
+EXPORT_PIP_DEPS="$EXPORT_DIR/pip-requirements.txt"
+EXECUTABLE="$EXPORT_DIR/investigate-jpeg"
+
+if [ -d "$EXPORT_DIR" ]; then
+    rm -drf "$EXPORT_DIR"
+fi
+if [ -f "$EXPORT_TAR" ]; then
+    rm -f "$EXPORT_TAR"
+fi
+
+#copy tool and requirements
+cp -R "./jpeg-investigator" "$EXPORT_DIR"
+echo "python3.10" >> "$EXPORT_APT_DEPS"
+echo "python3-pip" >> "$EXPORT_APT_DEPS"
+echo "exiftool" >> "$EXPORT_APT_DEPS"
+echo "texttable" >> "$EXPORT_PIP_DEPS"
+
+#create example usage structure
+mkdir "$EXPORT_DIR/workdir"
+find workdir -mindepth 1 -maxdepth 1 -type f -exec cp "{}" "$EXPORT_DIR/{}" \;
+
+#exchange main executable to native version
+rm -f "$EXPORT_DIR/entrypoint.sh"
+echo "#!/bin/bash" > "$EXECUTABLE"
+echo "python3 -u ./jpeg_investigator.py \"\$@\"" >> "$EXECUTABLE"
+echo "exit \$?" >> "$EXECUTABLE"
+chmod +x "$EXECUTABLE"
+
+cp "./scripts/investigate-all" "$EXPORT_DIR/investigate-all" && chmod +x "$EXPORT_DIR/investigate-all"
+cp "./scripts/classify-all" "$EXPORT_DIR/classify-all" && chmod +x "$EXPORT_DIR/classify-all"
+
+#tar -cvzf "$EXPORT_TAR" "$EXPORT_DIR"
+#rm -drf "$EXPORT_DIR"
+
+#TODO: write run scripts after successful build
+#   investigate-jpeg, investigate-all, classify-all; last both copied to release!
+#TODO: update readme and include with release!
+
+echo "Done!"
+exit 0

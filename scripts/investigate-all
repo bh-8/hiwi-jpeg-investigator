@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ ! -d "./workdir" ]; then
+    echo "ERROR: Could not find directory '$(realpath ./workdir)'!"
+    exit 20
+fi
+jpg_files=`ls ./workdir/*.jpg`
+./investigate-jpeg --extract_directory "./workdir/full-processing" --extract_segments "*" --extract_thumbnails --json_file "./workdir/full-processing/full-processing.json" --force $jpg_files
+exit $?
