@@ -3,9 +3,8 @@
 /classify-all
 /jpeg-investigator-release.tar.gz
 
-/workdir/full-processing
-/workdir/segment-classifier
-/workdir/segment-classifier-hashmap
+/workdir/*
+!/workdir/*.jpg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
